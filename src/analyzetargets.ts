@@ -2,6 +2,7 @@ import { NS } from '@ns'
 import { findServers } from '/servers'
 
 export function hackProfitHeuristic(x: string, ns: NS, tc:number): number {
+	if(x == "home" || ns.getPurchasedServers().includes(x) || !ns.hasRootAccess(x)) return 0;
 	const ht = ns.getHackTime(x);
 	const gt = ht * 3.2;
 	const wt = ht * 4;

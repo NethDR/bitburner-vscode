@@ -14,18 +14,19 @@ export async function main(ns: NS): Promise<void> {
 		ns.exec("hack.js", s, tc, tgt);
 	}
 
-	const donotkill = ["contract.js", "automate.js", "hackall.js", "buymxsrvrs.js"];
+	const donotkill = ["contract.js", "automate.js", "hackall.js", "buymxsrvrs.js", "watcher.js"];
 	const port_openers = [
 		{ exe: "BruteSSH.exe", fn: ns.brutessh, isopen: ((x: string) => ns.getServer(x).sshPortOpen) },
 		{ exe: "FTPCrack.exe", fn: ns.ftpcrack, isopen: ((x: string) => ns.getServer(x).ftpPortOpen) },
 		{ exe: "HTTPWorm.exe", fn: ns.httpworm, isopen: ((x: string) => ns.getServer(x).httpPortOpen) },
 		{ exe: "SQLInject.exe", fn: ns.sqlinject, isopen: ((x: string) => ns.getServer(x).sqlPortOpen) },
 		{ exe: "relaySMTP.exe", fn: ns.relaysmtp, isopen: ((x: string) => ns.getServer(x).smtpPortOpen) }];
-	const oldtgt = undefined;
+	let oldtgt = undefined;
 	ns.tprint
 	while (true) {
 		const tgt = sortHackTargets(ns)[0];
-		if (tgt != oldtgt)
+		if (tgt != oldtgt){
+			oldtgt = tgt;
 			for (const s of findServers(ns)) {
 				for (const p of port_openers) {
 					if (ns.fileExists(p.exe, "home") && !p.isopen(s)) {
@@ -33,7 +34,7 @@ export async function main(ns: NS): Promise<void> {
 					}
 				}
 				await hack1(s, tgt);
-			}
-		await ns.sleep(ns.getHackTime(tgt) * 10);
+			}}
+		await ns.sleep(ns.getHackTime(tgt) * 16);
 	}
 }
