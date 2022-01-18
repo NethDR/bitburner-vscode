@@ -15,9 +15,11 @@ export function hackProfitHeuristic(x: string, ns: NS, tc:number): number {
 }
 
 export function sortHackTargets(ns: NS): string[] {
-	const servers = findServers(ns);
+	let servers = findServers(ns);
 	const tc = servers.map(x => Math.floor(ns.getServerMaxRam(x) / ns.getScriptRam("hack.js"))).reduce((x, y) => x + y);
-	return servers.filter(x => ns.getServerMoneyAvailable(x) > 0).sort((x, y) => hackProfitHeuristic(y,ns,tc) - hackProfitHeuristic(x,ns,tc));
+
+	servers = servers.filter(x => x != "home" && ns.hasRootAccess(x))
+	return servers.sort((x, y) => hackProfitHeuristic(y,ns,tc) - hackProfitHeuristic(x,ns,tc));
 }
 
 export async function main(ns: NS): Promise<void> {

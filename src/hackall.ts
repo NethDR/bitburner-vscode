@@ -1,5 +1,5 @@
 import { NS } from '@ns'
-import { sortHackTargets } from 'analyzetargets'
+import { sortHackTargets, hackProfitHeuristic } from '/analyzetargets'
 import { findServers } from '/servers'
 
 export async function main(ns: NS): Promise<void> {
@@ -22,10 +22,19 @@ export async function main(ns: NS): Promise<void> {
 		{ exe: "SQLInject.exe", fn: ns.sqlinject, isopen: ((x: string) => ns.getServer(x).sqlPortOpen) },
 		{ exe: "relaySMTP.exe", fn: ns.relaysmtp, isopen: ((x: string) => ns.getServer(x).smtpPortOpen) }];
 	let oldtgt = undefined;
-	ns.tprint
+	for (const s of findServers(ns)) {
+		for (const p of port_openers) {
+			if (ns.fileExists(p.exe, "home") && !p.isopen(s)) {
+				p.fn(s);
+			}
+		}
+		if(!ns.hasRootAccess(s) && ns.getServer(s).numOpenPortsRequired <= ns.getServer(s).openPortCount) {
+			ns.nuke(s);
+		}
+	}
 	while (true) {
 		const tgt = sortHackTargets(ns)[0];
-		if (tgt != oldtgt){
+		if (tgt != oldtgt) {
 			oldtgt = tgt;
 			for (const s of findServers(ns)) {
 				for (const p of port_openers) {
@@ -34,7 +43,8 @@ export async function main(ns: NS): Promise<void> {
 					}
 				}
 				await hack1(s, tgt);
-			}}
+			}
+		}
 		await ns.sleep(ns.getHackTime(tgt) * 16);
 	}
 }
